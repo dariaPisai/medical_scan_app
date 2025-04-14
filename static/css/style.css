@@ -1,0 +1,449 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f4;
+    line-height: 1.6;
+    color: #333;
+    position: relative;
+}
+
+.container {
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.login-container {
+    display: flex;
+    width: 100vw;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.login-info-panel {
+    flex: 1;
+    margin: 0;
+    padding: 40px 60px;
+    background-image: url('/static/icons/neural-map.gif');
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 60px;
+    border: none;
+    outline: none;
+}
+
+.login-info-panel .info-content {
+    max-width: 400px;
+}
+
+.login-info-panel .login-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-bottom: 25px;
+}
+
+.login-info-panel h2 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+}
+
+.login-info-panel p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.login-form-panel {
+    flex: 2;
+    margin: 0;
+    padding: 20px 40px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    border: none;
+    outline: none;
+}
+
+.login-form-panel .form-content {
+    width: 100%;
+    max-width: 450px;
+    margin: auto;
+}
+
+.login-form-panel h2 {
+    font-size: 2rem;
+    margin-bottom: 25px;
+    color: #333;
+    text-align: left;
+}
+
+.login-info-panel .navbar-brand,
+.login-info-panel .nav-link {
+    color: #ffffff;
+}
+
+.login-form-panel .nav-link {
+    color: #333333;
+}
+
+.signup-link {
+    color: #555;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.signup-link:hover {
+    text-decoration: underline;
+}
+
+.social-login {
+    margin-bottom: 25px;
+}
+
+.social-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #333;
+}
+
+.social-button:hover {
+    background-color: #f9f9f9;
+}
+
+.social-button .icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: #aaa;
+}
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #eee;
+}
+
+.separator span {
+    padding: 0 15px;
+    font-size: 0.9rem;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #888;
+}
+
+.label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.password-toggle {
+    font-size: 0.8rem;
+    color: #777;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.remember-me label {
+    margin-left: 5px;
+    color: #555;
+}
+.forgot-password-link {
+    color: #555;
+    text-decoration: none;
+}
+.forgot-password-link:hover {
+    text-decoration: underline;
+}
+
+.submit-group {
+    margin-top: 25px;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 25px;
+    background-color: #cccccc;
+    color: #666;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.form-footer {
+    text-align:center;
+    margin-top: 30px;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 3px;
+}
+
+.alert {
+    padding: 10px 15px;
+    margin: 10px auto;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    max-width: 450px;
+    text-align: center;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+
+/* Header and Navbar Styling - UPDATED */
+.site-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    padding: 20px 0; /* Adjust padding as needed */
+    border: none; /* Optional: Add a subtle line below */
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    padding: 0;
+}
+
+.navbar-brand {
+    /* CHANGE color to be dark */
+    color: #ffffff; /* Dark gray/black */
+    margin-left: 60px;
+    z-index: 2;
+}
+
+.navbar-links {
+    margin-right: 40px;
+}
+
+.navbar-links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-links li {
+    margin-left: 15px;
+    transition: all 0.3s ease 0s;
+}
+
+.navbar-links .nav-link {
+    /* CHANGE color to be dark */
+    color: #333333; /* Dark gray */
+}
+
+.navbar-links .nav-link:hover {
+    /* CHANGE hover color if needed */
+    color: #000000; /* Black on hover */
+}
+
+/* Specific styling for auth links - UPDATED */
+.auth-links .welcome-user {
+    /* CHANGE color to be dark */
+    color: #444444; /* Dark gray */
+    font-size: 0.9rem;
+    margin-right: 5px;
+}
+
+/* Style register/logout links - Maybe make them less prominent now */
+.nav-link.button-register,
+.nav-link.button-logout {
+    /* Example: Outlined button style */
+    background-color: transparent;
+    border: none; /* Blue border */
+    color: #000000; /* Blue text */
+    padding: 5px 10px; /* Adjust padding slightly */
+    font-weight: 500; /* Remove bold perhaps */
+}
+
+.nav-link.button-register:hover,
+.nav-link.button-logout:hover {
+    background-color: transparent; /* Fill blue on hover */
+    color: #828181;
+}
+
+.nav-link.button-logout { 
+    color: #e74c3c; /* Red text */
+}
+.nav-link.button-logout:hover {
+    background-color: #e74c3c; /* Fill red on hover */
+    color: #ffffff;
+}
+
+.main-content {
+    padding: 0; 
+}
+
+
+.flash-messages {
+    margin-bottom: 20px; 
+}
+
+footer {
+    margin-top: 40px;
+    padding: 20px 0;
+    text-align: center;
+    color: #777;
+    font-size: 0.9rem;
+}
+
+footer hr {
+    border: 0;
+    height: 1px;
+    background-color: #eee;
+    margin-bottom: 20px;
+}
+
+
+
+@media (max-width: 1100px) {
+    .navbar {
+        padding: 0 20px;
+    }
+
+    .navbar-brand {
+        margin-left: 0;
+    }
+
+    .navbar-links {
+        margin-right: 0;
+    }
+    .navbar-links ul li {
+        margin-left: 10px; 
+        margin-right: 10px;
+    }
+    .auth-links {
+         margin-left: auto; 
+    }
+    
+
+    .login-container {
+        flex-direction: column;
+    }
+    .login-info-panel {
+        min-height: 30vh; 
+        padding: 30px;
+        flex: none; 
+        text-align: center;
+    }
+    .login-info-panel .info-content {
+        max-width: none; 
+        margin: auto;
+    }
+    .login-info-panel .logo-placeholder {
+         margin-left: auto;
+         margin-right: auto;
+    }
+
+
+    .login-form-panel {
+        flex: none; 
+        padding: 30px 20px; 
+    }
+    .login-form-panel .form-content,
+    .login-form-panel .form-header {
+        max-width: none; 
+    }
+
+}

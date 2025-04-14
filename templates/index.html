@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>Welcome, {{ username }}! Analyze Your Scan</h1>
+
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('analyze') }}"> <label for="scan_file">Upload Brain Scan:</label>
+        <input type="file" id="scan_file" name="scan_file" accept=".dcm,.nii,.nii.gz,.png,.jpg,.jpeg">
+        <button type="submit">Analyze Scan</button>
+    </form>
+
+    <div id="results">
+        <h2>Analysis Results</h2>
+
+        {% if error %}
+            <p style="color: red;"><strong>Error:</strong> {{ error }}</p>
+        {% endif %}
+
+        {% if uploaded_filename %}
+             <p>Showing results for: <strong>{{ uploaded_filename }}</strong></p>
+        {% endif %}
+
+        <div>
+            <h3>Scan Visualization</h3>
+            {% if image_visualization_url %}
+                <img src="{{ image_visualization_url }}" alt="Scan Visualization" width="300">
+            {% else %}
+                <p>[Visualization Placeholder]</p>
+            {% endif %}
+        </div>
+        <hr>
+        <div>
+            <h3>Generated Report</h3>
+            {% if report %}
+                <pre style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">{{ report }}</pre>
+            {% elif uploaded_filename and not error %}
+                 <p>[Report Generation Pending or Failed]</p>
+            {% elif request.method == 'POST' and not error %}
+                 <p>[No report generated - check logs or analysis status]</p>
+            {% else %}
+                 <p>[Upload a scan to see the report]</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
