@@ -1,48 +1,121 @@
+:root {
+    --accent-red: #E53935; /* Example Red */
+    --accent-blue: #03A9F4; /* Example Light Blue */
+    --accent-green: #4CAF50; /* Example Green */
+    --dark-bg-form: #1a1a2e; /* Example Dark Blue/Purple background for form - ADJUST */
+    --dark-input-bg: #2c3e50; /* Example Darker input background - ADJUST */
+    --dark-border: #4a4a5e; /* Example Dark border - ADJUST */
+    --light-text: #e0e0e0;
+    --light-text-muted: #bdc3c7;
+    --placeholder-text: #7f8c8d;
+    --overlay-gradient: linear-gradient(
+        to right,
+        rgba(10, 10, 24, 0.2) 0%,
+        rgba(10, 10, 24, 0.5) 40%, 
+        rgba(10, 10, 24, 0.85) 70%,
+        rgba(10, 10, 24, 0.9) 100%
+    );
+}
+
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}
-
+/* Update body and container styles for full background */
 body {
     font-family: sans-serif;
-    background-color: #f4f4f4;
     line-height: 1.6;
     color: #333;
     position: relative;
+    background-color: #0a0a18; /* Dark background that matches brain image */
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
 }
 
 .container {
-    width: 100vw;
+    width: 100%;
     max-width: none;
     margin: 0;
     padding: 0;
     display: flex;
 }
 
+/* Update login container and gradient overlay */
 .login-container {
     display: flex;
-    width: 100vw;
+    width: 100%;
     min-height: 100vh;
     margin: 0;
     padding: 0;
-}
-
-.login-info-panel {
-    flex: 1;
-    margin: 0;
-    padding: 40px 60px;
+    position: relative;
     background-image: url('/static/icons/neural-map.gif');
     background-size: cover;
-    background-position: center;
+    background-position: center center;
+    background-attachment: fixed; /* Prevent image from moving */
+}
+
+/* Overlay for gradient effect */
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--overlay-gradient);
+    z-index: 1;
+    pointer-events: none;
+    transition: background 0.3s ease;
+}
+
+/* Add these classes to handle the different hover states with more distinct differences */
+.login-container.hover-info-panel::before {
+    background: linear-gradient(
+        to right,
+        rgba(10, 10, 24, 0) 0%,
+        rgba(10, 10, 24, 0.2) 20%,
+        rgba(10, 10, 24, 0.4) 40%,
+        rgba(10, 10, 24, 0.95) 80%
+    ) !important;
+}
+
+.login-container.hover-form-panel::before {
+    background: linear-gradient(
+        to right,
+        rgba(10, 10, 24, 0.3) 0%,
+        rgba(10, 10, 24, 0.5) 40%,
+        rgba(10, 10, 24, 0.6) 70%,
+        rgba(10, 10, 24, 0.7) 100%
+    ) !important;
+}
+
+/* Make form content more visible when form panel is being hovered */
+.login-container.hover-form-panel .login-form-panel .form-content {
+    background-color: rgba(26, 26, 46, 0.8);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+}
+
+/* Make the image more vibrant when info panel is being hovered */
+.login-container.hover-info-panel .login-info-panel {
+    filter: brightness(1.15);
+}
+
+/* Improve transitions for all elements */
+.login-info-panel,
+.login-form-panel,
+.login-form-panel .form-content {
+    transition: all 0.3s ease;
+}
+
+/* Update panels */
+.login-info-panel {
+    flex: 3;
+    margin: 0;
+    background: transparent; /* Remove background as it's now on container */
     color: #ffffff;
     display: flex;
     flex-direction: column;
@@ -50,6 +123,7 @@ body {
     padding: 40px 60px;
     border: none;
     outline: none;
+    position: relative;
 }
 
 .login-info-panel .info-content {
@@ -74,27 +148,52 @@ body {
     opacity: 0.9;
 }
 
+/* Login form panel styling - make it more transparent */
 .login-form-panel {
     flex: 2;
     margin: 0;
-    padding: 20px 40px;
-    background-color: #ffffff;
+    background: transparent;
+    color: var(--light-text);
     display: flex;
     flex-direction: column;
+    padding: 20px 40px;
     border: none;
     outline: none;
+    position: relative;
+    overflow: hidden;
+    justify-content: center;
+    z-index: 2;
+}
+
+/* Form content styling - more transparent, subtle borders */
+.login-form-panel .form-header,
+.login-form-panel .form-content {
+    position: relative; /* Or use higher z-index */
+    z-index: 1;
 }
 
 .login-form-panel .form-content {
     width: 100%;
     max-width: 450px;
     margin: auto;
+    background-color: rgba(26, 26, 46, 0.6); /* More transparent background */
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+    border: none; /* Remove border */
+    transition: all 0.3s ease;
+}
+
+.login-form-panel .form-content:hover {
+    background-color: rgba(26, 26, 46, 0.75);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
 }
 
 .login-form-panel h2 {
     font-size: 2rem;
     margin-bottom: 25px;
-    color: #333;
+    color: #ffffff;
     text-align: left;
 }
 
@@ -108,13 +207,14 @@ body {
 }
 
 .signup-link {
-    color: #555;
+    color: #bdc3c7;
     text-decoration: none;
     font-size: 0.9rem;
 }
 
 .signup-link:hover {
     text-decoration: underline;
+    color: #ffffff;
 }
 
 .social-login {
@@ -129,16 +229,16 @@ body {
     padding: 12px 20px;
     margin-bottom: 15px;
     border-radius: 25px;
-    border: 1px solid #ccc;
-    background-color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
     font-size: 0.95rem;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    color: #333;
+    color: #ffffff;
 }
 
 .social-button:hover {
-    background-color: #f9f9f9;
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .social-button .icon {
@@ -152,13 +252,13 @@ body {
     align-items: center;
     text-align: center;
     margin: 25px 0;
-    color: #aaa;
+    color: #7f8c8d;
 }
 .separator::before,
 .separator::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #4a4a5e;
 }
 
 .separator span {
@@ -173,21 +273,30 @@ body {
 .form-label {
     display: block;
     font-size: 0.85rem;
-    color: #666;
+    color: #bdc3c7;
     margin-bottom: 5px;
 }
 
+/* Form inputs - more seamless with the design */
 .form-input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1px solid #ccc;
+    background-color: rgba(44, 62, 80, 0.5); /* More transparent */
+    border: 1px solid rgba(55, 90, 138, 0.3); /* Subtler border */
+    color: #ffffff;
     border-radius: 8px;
     font-size: 1rem;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    width: 100%;
 }
 
 .form-input:focus {
-    outline: none;
-    border-color: #888;
+    background-color: rgba(44, 62, 80, 0.7);
+    border-color: rgba(3, 169, 244, 0.6);
+    box-shadow: 0 0 0 2px rgba(3, 169, 244, 0.2);
+}
+
+.form-input::placeholder { 
+    color: #7f8c8d;
 }
 
 .label-container {
@@ -198,10 +307,15 @@ body {
 
 .password-toggle {
     font-size: 0.8rem;
-    color: #777;
+    color: #bdc3c7;
     text-decoration: none;
     cursor: pointer;
 }
+
+.password-toggle:hover {
+    color: #ffffff;
+}
+
 
 .form-options {
     display: flex;
@@ -213,31 +327,45 @@ body {
 
 .remember-me label {
     margin-left: 5px;
-    color: #555;
+    color: #bdc3c7;
 }
 .forgot-password-link {
-    color: #555;
+    color: #bdc3c7;
     text-decoration: none;
 }
 .forgot-password-link:hover {
     text-decoration: underline;
+    color: #ffffff;
 }
 
 .submit-group {
     margin-top: 25px;
 }
 
+/* Update buttons to be more consistent with the design */
 .submit-button {
     width: 100%;
     padding: 14px 20px;
     border: none;
     border-radius: 25px;
-    background-color: #cccccc;
-    color: #666;
+    background: linear-gradient(135deg, rgba(3, 169, 244, 0.8) 0%, rgba(55, 90, 138, 0.8) 100%);
+    color: #ffffff;
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(3, 169, 244, 0.2);
+}
+
+.submit-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #029be0 0%, #2a4a74 100%);
+}
+
+.submit-button:disabled {
+    background-color: #555; /* Darker gray for disabled */
+    color: #999;
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .form-footer {
@@ -252,6 +380,7 @@ body {
     margin-top: 3px;
 }
 
+/* Alert modifications */
 .alert {
     padding: 10px 15px;
     margin: 10px auto;
@@ -259,42 +388,44 @@ body {
     border-radius: 4px;
     max-width: 450px;
     text-align: center;
+    background-color: rgba(26, 26, 46, 0.9);
+    border-left: 4px solid #03A9F4;
+    color: #ffffff;
+    backdrop-filter: blur(5px);
+    text-align: center;
+    margin: 0 0 20px 0;
 }
 
 .alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+    border-color: #4CAF50;
 }
 
 .alert-danger {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
+    border-color: #E53935;
 }
+
 .alert-info {
-    color: #0c5460;
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
+    border-color: #03A9F4;
 }
+
 .alert-warning {
-    color: #856404;
-    background-color: #fff3cd;
-    border-color: #ffeeba;
+    border-color: #FFC107;
 }
 
 
-/* Header and Navbar Styling - UPDATED */
+/* Site header - make it more transparent */
 .site-header {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 10;
-    padding: 20px 0; /* Adjust padding as needed */
-    border: none; /* Optional: Add a subtle line below */
+    padding: 20px 0;
+    background: linear-gradient(to bottom, rgba(10, 10, 24, 0.4) 0%, rgba(10, 10, 24, 0) 100%);
+    border: none;
 }
 
+/* Header and Navbar Styling - UPDATED */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -305,10 +436,9 @@ body {
 }
 
 .navbar-brand {
-    /* CHANGE color to be dark */
-    color: #ffffff; /* Dark gray/black */
+    color: #03A9F4; /* Light blue from brain image */
     margin-left: 60px;
-    z-index: 2;
+    font-weight: 600;
 }
 
 .navbar-links {
@@ -329,37 +459,36 @@ body {
 }
 
 .navbar-links .nav-link {
-    /* CHANGE color to be dark */
-    color: #333333; /* Dark gray */
+    color: #ffffff;
+    opacity: 0.9;
+    padding: 5px 10px;
 }
 
 .navbar-links .nav-link:hover {
-    /* CHANGE hover color if needed */
-    color: #000000; /* Black on hover */
+    opacity: 1;
 }
 
 /* Specific styling for auth links - UPDATED */
 .auth-links .welcome-user {
-    /* CHANGE color to be dark */
     color: #444444; /* Dark gray */
     font-size: 0.9rem;
     margin-right: 5px;
 }
 
-/* Style register/logout links - Maybe make them less prominent now */
+/* Login/Register links - make them match the form area better */
 .nav-link.button-register,
 .nav-link.button-logout {
-    /* Example: Outlined button style */
     background-color: transparent;
-    border: none; /* Blue border */
-    color: #000000; /* Blue text */
-    padding: 5px 10px; /* Adjust padding slightly */
-    font-weight: 500; /* Remove bold perhaps */
+    border: none;
+    color: #03A9F4; /* Match brand color */
+    padding: 5px 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
 .nav-link.button-register:hover,
 .nav-link.button-logout:hover {
-    background-color: transparent; /* Fill blue on hover */
+    background-color: transparent;
     color: #828181;
 }
 
@@ -380,22 +509,27 @@ body {
     margin-bottom: 20px; 
 }
 
+/* Style footer to match the design */
 footer {
-    margin-top: 40px;
-    padding: 20px 0;
-    text-align: center;
-    color: #777;
-    font-size: 0.9rem;
+    background-color: rgba(10, 10, 24, 0.8);
+    margin-top: 0;
+    padding: 15px 0;
+    color: rgba(255, 255, 255, 0.6);
+    position: relative;
+    z-index: 5;
 }
 
 footer hr {
     border: 0;
     height: 1px;
-    background-color: #eee;
-    margin-bottom: 20px;
+    background: linear-gradient(to right, rgba(3, 169, 244, 0.2), rgba(3, 169, 244, 0.5), rgba(3, 169, 244, 0.2));
+    margin-bottom: 15px;
 }
 
-
+footer {
+    text-align: center;
+    font-size: 0.9rem;
+}
 
 @media (max-width: 1100px) {
     .navbar {

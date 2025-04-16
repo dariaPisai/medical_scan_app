@@ -4,13 +4,13 @@
 
 {% block content %}
 <div class="login-container">
-    <div class="login-info-panel">
+    <div class="login-info-panel" id="login-info-panel">
         <div class="info-content">
             <div class="logo-placeholder"></div> <h2>Your own diagnosis assistant</h2>
             <p>Get your own personalised diagnosis and medical report based on a simple MRI scan!</p>
         </div>
     </div>
-    <div class="login-form-panel">
+    <div class="login-form-panel" id="login-form-panel">
 
         <div class="form-content">
             {% with messages = get_flashed_messages(with_categories=true) %}
