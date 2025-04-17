@@ -22,8 +22,8 @@
                         <li><span class="welcome-user">Welcome, {{ current_user.username }}!</span></li>
                         <li><a href="{{ url_for('auth.logout') }}" class="nav-link button-logout">Logout</a></li>
                     {% else %}
-                        <li><a href="{{ url_for('auth.login') }}" class="nav-link">Login</a></li>
-                        <li><a href="{{ url_for('auth.register') }}" class="nav-link button-register">Register</a></li>
+                        <!-- <li><a href="{{ url_for('auth.login') }}" class="nav-link">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}" class="nav-link button-register">Register</a></li> -->
                     {% endif %}
                 </ul>
             </div>
