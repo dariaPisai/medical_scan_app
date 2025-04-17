@@ -156,13 +156,15 @@ body {
     color: var(--light-text);
     display: flex;
     flex-direction: column;
-    padding: 20px 40px;
+    padding: 20px;
     border: none;
     outline: none;
     position: relative;
     overflow: hidden;
     justify-content: center;
     z-index: 2;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Form content styling - more transparent, subtle borders */
@@ -174,7 +176,7 @@ body {
 
 .login-form-panel .form-content {
     width: 100%;
-    max-width: 450px;
+    max-width: 400px;
     margin: auto;
     background-color: rgba(26, 26, 46, 0.6); /* More transparent background */
     padding: 25px;
@@ -183,6 +185,10 @@ body {
     backdrop-filter: blur(8px);
     border: none; /* Remove border */
     transition: all 0.3s ease;
+
+    /* These properties help with the flip animation */
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
 .login-form-panel .form-content:hover {
@@ -226,12 +232,12 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 12px 20px;
+    padding: 8px;
     margin-bottom: 15px;
     border-radius: 25px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background-color: rgba(255, 255, 255, 0.1);
-    font-size: 0.95rem;
+    font-size: 14px;
     cursor: pointer;
     transition: background-color 0.2s ease;
     color: #ffffff;
@@ -267,7 +273,12 @@ body {
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+}
+
+/* Slightly reduce form group spacing for registration form */
+#register-section .form-group {
+    margin-bottom: 15px;
 }
 
 .form-label {
@@ -285,8 +296,9 @@ body {
     border-radius: 8px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    padding: 10px 15px;
+    padding: 8px 12px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -529,6 +541,134 @@ footer hr {
 footer {
     text-align: center;
     font-size: 0.9rem;
+}
+
+.auth-section {
+    display: block;
+    opacity: 1;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.auth-section.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-section.active {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.form-content {
+    min-height: 480px; /* Adjust based on your forms */
+}
+
+/* Add these styles for the form flip animation */
+
+/* Container for the flipping forms */
+.form-flip-container {
+    perspective: 1000px;
+    width: 100%;
+    min-height: 500px; /* Adjust minimum height to accommodate the larger form */
+    height: auto;
+    transition: height 0.6s ease-in-out;
+}
+
+/* Actual flipper element that rotates */
+.form-flipper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: 0.6s;
+    transform-style: preserve-3d;
+}
+
+/* Show back panel when flipped */
+.form-flip-container.flipped .form-flipper {
+    transform: rotateY(180deg);
+}
+
+/* Position both forms absolutely within the container */
+.auth-section {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    transition: none; /* Remove previous transition */
+    transform: none; /* Remove previous transform */
+    opacity: 1; /* Always visible */
+    display: block; /* Always displayed */
+}
+
+#login-section {
+    z-index: 2;
+    transform: rotateY(0deg);
+}
+
+#register-section {
+    transform: rotateY(180deg);
+}
+
+/* Remove old animation since we're using the flip now */
+.auth-section.active {
+    animation: none;
+}
+
+/* Adjust min-height for proper sizing */
+.form-content {
+    min-height: 550px; /* Adjust based on your form height */
+    overflow: visible; /* Ensure content doesn't get cut */
+}
+
+#login-section.auth-section {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Ensure consistent form styles across both sections */
+#login-section, #register-section {
+    backface-visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-flip-container {
+        min-height: 600px; /* Increase for smaller screens */
+    }
+    
+    .login-container {
+        flex-direction: column;
+    }
+    
+    .login-info-panel, .login-form-panel {
+        width: 100%;
+    }
+}
+
+.password-helper {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    margin-top: 3px;
 }
 
 @media (max-width: 1100px) {

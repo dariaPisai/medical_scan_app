@@ -56,6 +56,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
+    register_form = RegistrationForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password_hash, form.password.data):
@@ -65,7 +66,7 @@ def login():
             return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Login Unsuccessful. Please check your email or password.', 'danger')
-    return render_template('login.html', title="Login", form=form)
+    return render_template('auth/login.html', title="Login", form=form, register_form=register_form)
     
 @auth_bp.route('/logout')
 @login_required
