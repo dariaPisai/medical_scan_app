@@ -1,0 +1,181 @@
+/* static/css/dashboard.css */
+
+/* Use variables defined in style.css */
+
+/* --- Page Wrapper & Sidebar Layout --- */
+.page-wrapper {
+    display: flex;
+    flex-grow: 1; /* Allows main content to fill height */
+    padding-left: var(--sidebar-width-collapsed); /* Space for collapsed sidebar */
+    transition: padding-left 0.3s ease;
+    position: relative; /* Ensure relative positioning for children */
+    width: 100%;
+}
+
+.sidebar {
+    width: var(--sidebar-width-collapsed);
+    background-color: var(--dark-bg-panel);
+    border-right: 1px solid var(--dark-border);
+    position: fixed;
+    left: 0;
+    top: 61px; /* Match navbar height - ADJUST IF NAVBAR HEIGHT CHANGES */
+    bottom: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: width 0.3s ease;
+    z-index: 900;
+    white-space: nowrap;
+}
+
+.sidebar:hover {
+    width: var(--sidebar-width);
+}
+/* Adjust main content margin when sidebar expands */
+.sidebar:hover + .main-content {
+    margin-left: var(--sidebar-width); /* Change from padding-left to margin-left */
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    margin-top: 20px;
+}
+
+.sidebar-nav li {
+    margin: 5px 0;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--light-text-muted);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    overflow: hidden;
+}
+.sidebar-link .fa-icon { /* Placeholder */
+    width: calc(var(--sidebar-width-collapsed) - 30px);
+    text-align: center;
+    font-size: 1.1rem;
+    margin-right: 15px;
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+.sidebar-link span {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    visibility: hidden; /* Hide completely when collapsed */
+}
+.sidebar:hover .sidebar-link span {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background-color: rgba(3, 169, 244, 0.1);
+    color: #ffffff;
+    border-left: 3px solid var(--accent-blue);
+    padding-left: 12px;
+}
+/* Active state when collapsed */
+.sidebar:not(:hover) .sidebar-link.active {
+     background-color: transparent;
+     border-left: 3px solid var(--accent-blue);
+     padding-left: 12px;
+}
+.sidebar:not(:hover) .sidebar-link.active .fa-icon {
+     color: var(--accent-blue); /* Highlight icon when active and collapsed */
+}
+
+
+/* --- Main Content Area (Dashboard) --- */
+.main-content.has-sidebar { /* Use specific class */
+    flex-grow: 1;
+    padding: 30px;
+    /* Use margin-left for sidebar spacing */
+    margin-left: var(--sidebar-width-collapsed);
+    width: calc(100% - var(--sidebar-width-collapsed));
+    transition: margin-left 0.3s ease; /* Transition margin */
+    overflow-y: auto; /* Scroll main content if needed */
+}
+
+.content-section {
+    display: none;
+    animation: fadeIn 0.5s ease forwards;
+}
+.content-section.active-section {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Homepage Specific Styles (Upload Section) --- */
+#upload-section h1 { color: #fff; margin-bottom: 20px; }
+#upload-section p { margin-bottom: 30px; color: var(--light-text-muted); }
+
+.upload-form .form-group { margin-bottom: 20px; }
+.upload-form .form-label { color: var(--light-text-muted); font-size: 0.9rem; display: block; margin-bottom: 8px; }
+.upload-form .form-input { /* General input style for dark theme */
+    background-color: var(--dark-input-bg);
+    border: 1px solid var(--dark-border);
+    color: var(--light-text);
+    border-radius: 8px;
+    padding: 12px 15px;
+    width: 100%;
+    font-size: 1rem;
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+.upload-form .form-input::placeholder { color: var(--placeholder-text); }
+.upload-form .form-input:focus {
+     background-color: var(--dark-input-bg); outline: none;
+     border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(3, 169, 244, 0.2);
+}
+.upload-form .form-input.file-input { /* Specific styling for file input */
+    padding: 10px; max-width: 500px;
+}
+.upload-form .submit-button {
+    width: auto; padding: 12px 30px;
+    background: linear-gradient(135deg, rgba(3, 169, 244, 0.8) 0%, rgba(55, 90, 138, 0.8) 100%);
+    color: #ffffff; font-size: 1rem; font-weight: bold; cursor: pointer;
+    transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(3, 169, 244, 0.2);
+    border: none; border-radius: 25px;
+}
+.upload-form .submit-button:hover:not(:disabled) { background: linear-gradient(135deg, #029be0 0%, #2a4a74 100%); }
+
+
+/* Style results area */
+.analysis-results {
+    margin-top: 40px; background-color: rgba(26, 26, 46, 0.3);
+    padding: 25px; border-radius: 8px; border: 1px solid var(--dark-border);
+}
+.analysis-results h2 { color: #fff; margin-bottom: 20px; border-bottom: 1px solid var(--dark-border); padding-bottom: 10px; }
+.result-item { margin-bottom: 25px; }
+.result-item h3 { color: var(--accent-blue); margin-bottom: 10px; font-size: 1.1rem; }
+.visualization-img { max-width: 100%; height: auto; border-radius: 4px; border: 1px solid var(--dark-border); background-color: #000; }
+.report-output {
+    white-space: pre-wrap; border: 1px solid var(--dark-border); padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2); color: var(--light-text); border-radius: 4px;
+    font-family: monospace; max-height: 400px; overflow-y: auto;
+}
+.placeholder-text { color: var(--light-text-muted); font-style: italic; }
+
+
+/* --- Convert Section Styles --- */
+#convert-section h1 { color: #fff; margin-bottom: 20px; }
+#convert-section p { color: var(--light-text-muted); margin-bottom: 20px; }
+
+
+/* --- Responsive (Dashboard specific) --- */
+@media (max-width: 768px) {
+    .page-wrapper { padding-left: 0; }
+    .sidebar { width: var(--sidebar-width-collapsed); /* Keep collapsed on mobile hover? Or use JS toggle */ }
+    .sidebar:hover { width: var(--sidebar-width-collapsed); /* Prevent hover expansion */ }
+    .sidebar:hover + .main-content { margin-left: var(--sidebar-width-collapsed); } /* Adjust margin */
+    .main-content.has-sidebar { margin-left: var(--sidebar-width-collapsed); width: calc(100% - var(--sidebar-width-collapsed)); padding: 20px;}
+    /* Add specific styles for mobile sidebar toggle if using JS */
+}
