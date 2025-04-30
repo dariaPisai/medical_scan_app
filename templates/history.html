@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <!-- Expandable Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-brain sidebar-icon"></i>
+            <span class="sidebar-text">Medical Scan App</span>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-microscope sidebar-icon"></i><span class="sidebar-text">Analyze Scan</span></a></li>
+                <li><a href="{{ url_for('history') }}" class="active"><i class="fas fa-history sidebar-icon"></i><span class="sidebar-text">History</span></a></li>
+                <li><a href="#"><i class="fas fa-cog sidebar-icon"></i><span class="sidebar-text">Settings</span></a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt sidebar-icon"></i><span class="sidebar-text">Logout</span></a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <!-- Top Navbar -->
+        <header class="main-navbar">
+            <div class="navbar-title">
+                <i class="fas fa-bars menu-toggle" id="menu-toggle"></i>
+                <span>Analysis History</span>
+            </div>
+        </header>
+
+        <section class="analysis-section">
+            <div class="history-panel">
+                <div class="history-panel-header">
+                    <h2><i class="fas fa-history"></i> Your Analysis History</h2>
+                    <p>Review past brain scan analyses and results</p>
+                </div>
+
+                <div class="history-panel-content">
+                    {% with messages = get_flashed_messages() %}
+                      {% if messages %}
+                        <ul class="flashes">
+                        {% for message in messages %}
+                          <li>{{ message }}</li>
+                        {% endfor %}
+                        </ul>
+                      {% endif %}
+                    {% endwith %}
+
+                    {% if history %}
+                        <ul class="history-list">
+                            {% for record in history %}
+                            <li class="history-item">
+                                <div class="history-header">
+                                    <strong>{{ record.original_filename }}</strong>
+                                    <span class="history-timestamp">{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} UTC</span>
+                                </div>
+                                <div class="history-content">
+                                    <img src="{{ url_for('get_history_image', filename=record.stored_filename) }}"
+                                         alt="Scan for {{ record.original_filename }}"
+                                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='placeholder_image.png') }}'; this.alt='Image not found';">
+                                    <div class="history-details">
+                                        <p>
+                                            <span class="label">Prediction:</span>
+                                            <span class="value prediction-value">{{ record.predicted_class }}</span>
+                                        </p>
+                                        <p>
+                                            <span class="label">Confidence:</span>
+                                            <span class="value">{{ "%.2f"|format(record.confidence * 100) }}%</span>
+                                        </p>
+                                        <p>
+                                            <span class="label">Severity Level:</span>
+                                            <span class="value">{{ record.severity_level }}</span>
+                                            <span class="severity-note">(0=No Tumor, 1=Pituitary, 2=Meningioma, 3=Glioma)</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="empty-history">
+                            <p>You have no analysis history yet.</p>
+                            <p>Upload and analyze brain scans to start building your history.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add sidebar toggle functionality
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('expanded');
+                    document.querySelector('.main-content').classList.toggle('sidebar-expanded');
+                });
+            }
+        });
+    </script>
+{% endblock %}

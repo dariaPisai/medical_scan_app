@@ -1,0 +1,136 @@
+/* History Page Specific Styles */
+
+.history-list {
+    list-style: none;
+    padding: 0;
+}
+
+.history-item {
+    background-color: var(--dark-card);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.history-timestamp {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.history-content {
+    display: flex;
+    padding: 15px;
+    gap: 20px;
+}
+
+.history-item img {
+    width: 130px;
+    height: 130px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.history-details {
+    flex-grow: 1;
+}
+
+.history-details p {
+    margin: 8px 0;
+    display: flex;
+    align-items: baseline;
+}
+
+.history-details .label {
+    width: 120px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.history-details .value {
+    color: var(--text-primary);
+}
+
+.prediction-value {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.severity-note {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-left: 10px;
+}
+
+h1 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    font-weight: 500;
+}
+
+.empty-history {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.history-panel {
+    background-color: var(--dark-bg-secondary);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.history-panel-header {
+    background-color: var(--dark-bg);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--dark-border);
+}
+
+.history-panel-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.history-panel-header h2 i {
+    margin-right: 10px;
+}
+
+.history-panel-header p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.history-panel-content {
+    padding: 15px 20px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .history-content {
+        flex-direction: column;
+    }
+    
+    .history-item img {
+        width: 100%;
+        height: auto;
+        max-height: 200px;
+    }
+}

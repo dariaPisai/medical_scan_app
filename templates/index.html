@@ -1,46 +1,127 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Analyze Scan{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% endblock %}
 
 {% block content %}
-    <h1>Welcome, {{ username }}! Analyze Your Scan</h1>
-
-    <form method="post" enctype="multipart/form-data" action="{{ url_for('analyze') }}"> <label for="scan_file">Upload Brain Scan:</label>
-        <input type="file" id="scan_file" name="scan_file" accept=".dcm,.nii,.nii.gz,.png,.jpg,.jpeg">
-        <button type="submit">Analyze Scan</button>
-    </form>
-
-    <div id="results">
-        <h2>Analysis Results</h2>
-
-        {% if error %}
-            <p style="color: red;"><strong>Error:</strong> {{ error }}</p>
-        {% endif %}
-
-        {% if uploaded_filename %}
-             <p>Showing results for: <strong>{{ uploaded_filename }}</strong></p>
-        {% endif %}
-
-        <div>
-            <h3>Scan Visualization</h3>
-            {% if image_visualization_url %}
-                <img src="{{ image_visualization_url }}" alt="Scan Visualization" width="300">
-            {% else %}
-                <p>[Visualization Placeholder]</p>
-            {% endif %}
+<div class="app-layout">
+    <!-- Expandable Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-brain sidebar-icon"></i>
+            <span class="sidebar-text">Medical Scan App</span>
         </div>
-        <hr>
-        <div>
-            <h3>Generated Report</h3>
-            {% if report %}
-                <pre style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">{{ report }}</pre>
-            {% elif uploaded_filename and not error %}
-                 <p>[Report Generation Pending or Failed]</p>
-            {% elif request.method == 'POST' and not error %}
-                 <p>[No report generated - check logs or analysis status]</p>
-            {% else %}
-                 <p>[Upload a scan to see the report]</p>
-            {% endif %}
-        </div>
-    </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-microscope sidebar-icon"></i><span class="sidebar-text">Analyze Scan</span></a></li>
+                <li><a href="{{ url_for('history') }}"><i class="fas fa-history sidebar-icon"></i><span class="sidebar-text">History</span></a></li>
+                <li><a href="#"><i class="fas fa-cog sidebar-icon"></i><span class="sidebar-text">Settings</span></a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt sidebar-icon"></i><span class="sidebar-text">Logout</span></a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <!-- Top Navbar -->
+        <header class="main-navbar">
+            <div class="navbar-title">
+                <i class="fas fa-bars menu-toggle" id="menu-toggle"></i>
+                <span>Brain Scan Analysis</span>
+            </div>
+            <div class="navbar-user">Welcome, {{ username }}!</div>
+        </header>
+
+        <section class="analysis-section">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-laptop-medical"></i> Analyze Medical Scan</h2>
+                    <p>Upload a brain scan image to receive an AI-powered analysis</p>
+                </div>
+                
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="alert">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="analysis-container">
+                    <div class="upload-container">
+                        <form method="post" enctype="multipart/form-data" action="{{ url_for('analyze') }}" id="upload-form">
+                            <div id="drop-zone">
+                                <div class="drop-zone-inner">
+                                    <i class="fas fa-cloud-upload-alt drop-zone-icon"></i>
+                                    <p class="drop-title">Drag & drop scan image here</p>
+                                    <p class="drop-subtitle">or</p>
+                                    <div class="file-input-container">
+                                        <button type="button" class="browse-button" id="browse-button">Browse Files</button>
+                                        <input type="file" id="scan_file" name="scan_file" accept=".png,.jpg,.jpeg" required>
+                                    </div>
+                                    <p class="file-types">Supported formats: JPG, JPEG, PNG</p>
+                                </div>
+                            </div>
+                            
+                            <div id="selected-file-container" class="hidden">
+                                <div class="selected-file">
+                                    <i class="fas fa-file-image"></i>
+                                    <span id="filename-display"></span>
+                                    <button type="button" id="remove-file"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button type="submit" id="analyze-button" class="primary-button" disabled>
+                                    <i class="fas fa-microscope"></i> Analyze Scan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="results-container" id="results-container">
+                        <div class="results-header">
+                            <h3><i class="fas fa-chart-bar"></i> Analysis Results</h3>
+                            {% if not prediction %}
+                                <p class="no-results">Upload a scan image to see analysis results</p>
+                            {% endif %}
+                        </div>
+                        
+                        {% if prediction %}
+                            <div class="results-content">
+                                <div class="result-item">
+                                    <span class="result-label">File:</span>
+                                    <span class="result-value">{{ filename }}</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">Condition:</span>
+                                    <span class="result-value highlight">{{ prediction }}</span>
+                                </div>
+                                <div class="result-item">
+                                    <span class="result-label">Confidence:</span>
+                                    <span class="result-value">{{ confidence }}%</span>
+                                </div>
+                                {% if severity is defined %}
+                                <div class="result-item">
+                                    <span class="result-label">Severity:</span>
+                                    <span class="result-value">{{ severity }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/index_page.js') }}"></script>
 {% endblock %}
