@@ -6,6 +6,12 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image # Library to load images
 import io # For processing image in memory
+import pydicom # For reading DICOM
+from pydicom.pixel_data_handlers.util import apply_voi_lut # More robust windowing
+import numpy as np
+from PIL import Image
+import io
+from flask import send_file # For sending file for download
 # <<< ADDED/MODIFIED END >>>
 
 from werkzeug.utils import secure_filename # To secure original filenames
@@ -104,6 +110,35 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 # <<< ADDED/MODIFIED END >>>
 
+def apply_dicom_windowing(dicom_dataset):
+    """
+    Applies VOI LUT or Window Center/Width to DICOM pixel data
+    and converts to an 8-bit NumPy array suitable for display.
+    """
+    # Use pydicom's apply_voi_lut for robust windowing if VOI LUT Sequence or WC/WW is present
+    # It handles Rescale Slope/Intercept automatically
+    try:
+        # This function handles different scenarios (VOI LUT, WC/WW)
+        # It typically returns data ready for display, possibly > 8-bit initially
+        windowed_data = apply_voi_lut(dicom_dataset.pixel_array, dicom_dataset)
+        print("Applied VOI LUT or Window Center/Width.")
+    except Exception as e:
+        # Fallback if apply_voi_lut fails or tags are missing
+        print(f"VOI LUT/Windowing failed ({e}), applying simple scaling fallback.")
+        pixels = dicom_dataset.pixel_array.astype(float)
+        # Simple min-max scaling to 0-255
+        pixels = pixels - np.min(pixels)
+        pixels = pixels / (np.max(pixels) + 1e-8) # Avoid division by zero
+        windowed_data = (pixels * 255.0)
+
+    # Ensure data is scaled correctly to 8-bit (0-255)
+    # apply_voi_lut might return values outside this range depending on config
+    pixels_8bit = np.clip(windowed_data, 0, np.max(windowed_data)) # Clip just in case
+    if np.max(pixels_8bit) > 0: # Avoid division by zero if image is black
+         pixels_8bit = (pixels_8bit / np.max(pixels_8bit)) * 255.0
+    pixels_8bit = pixels_8bit.astype(np.uint8)
+    return pixels_8bit
+# <<< ADDED END: Helper function for DICOM Windowing >>>
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True) # flask se uita pt config in folderul instance
@@ -300,6 +335,94 @@ def create_app():
              print(f"Error serving image {filename}: {e}")
              from flask import abort
              abort(500) # Internal server error
+
+    
+    @app.route('/dicom_converter')
+    @login_required # Keep consistent with other app sections
+    def dicom_converter_form():
+        """Renders the upload form for DICOM conversion."""
+        return render_template('dicom_converter.html', username=current_user.username)
+
+    @app.route('/convert_dicom', methods=['POST'])
+    @login_required
+    def convert_dicom():
+        """Handles DICOM file upload, converts to JPG, and sends for download."""
+        if 'dicom_file' not in request.files:
+            flash('No file part provided.', 'error')
+            return redirect(url_for('dicom_converter_form'))
+
+        file = request.files['dicom_file']
+
+        if file.filename == '':
+            flash('No file selected.', 'error')
+            return redirect(url_for('dicom_converter_form'))
+
+        # Check file extension server-side
+        if not (file.filename.lower().endswith('.dcm') or file.filename.lower().endswith('.dicom')):
+            flash('Invalid file type. Please upload a .dcm or .dicom file.', 'error')
+            return redirect(url_for('dicom_converter_form'))
+
+        # Create a safe output filename based on the original name
+        original_filename_base = os.path.splitext(secure_filename(file.filename))[0]
+        output_filename = f"{original_filename_base}.jpg"
+
+        try:
+            # Read DICOM directly from the file stream
+            dicom_dataset = pydicom.dcmread(file.stream)
+
+            # --- Handle Pixel Data ---
+            if 'PixelData' not in dicom_dataset:
+                 flash('DICOM file does not contain pixel data.', 'error')
+                 return redirect(url_for('dicom_converter_form'))
+
+            pixel_array = dicom_dataset.pixel_array
+
+            # --- Handle Multi-frame DICOM (Select Middle Frame) ---
+            if pixel_array.ndim > 2:
+                print(f"Multi-frame DICOM detected (shape: {pixel_array.shape}). Selecting middle frame.")
+                middle_frame_index = pixel_array.shape[0] // 2
+                single_frame_pixels = pixel_array[middle_frame_index]
+                flash(f'Multi-frame DICOM detected. Converted middle frame ({middle_frame_index+1}/{pixel_array.shape[0]}).', 'info')
+            elif pixel_array.ndim == 2:
+                single_frame_pixels = pixel_array
+            else:
+                flash('Unsupported pixel data dimensions.', 'error')
+                return redirect(url_for('dicom_converter_form'))
+
+            # --- Apply Windowing and Convert to 8-bit ---
+            pixels_8bit = apply_dicom_windowing(dicom_dataset)
+            # Overwrite single_frame_pixels with windowed version if it was multiframe originally
+            if pixel_array.ndim > 2:
+                 single_frame_pixels = pixels_8bit[middle_frame_index] 
+            else:
+                 single_frame_pixels = pixels_8bit
+
+            # --- Create PIL Image and Save as JPG in Memory ---
+            # Ensure the array is contiguous for PIL
+            if not single_frame_pixels.flags['C_CONTIGUOUS']:
+                single_frame_pixels = np.ascontiguousarray(single_frame_pixels)
+
+            img = Image.fromarray(single_frame_pixels).convert('L') # Convert to Grayscale for JPG
+
+            img_io = io.BytesIO() # Create in-memory stream
+            img.save(img_io, 'JPEG', quality=90) # Higher quality (90 instead of 85)
+            img_io.seek(0) # Rewind the stream to the beginning
+
+            # --- Send the JPG file for download with proper filename ---
+            return send_file(
+                img_io,
+                mimetype='image/jpeg',
+                as_attachment=True, # Trigger download dialog
+                download_name=output_filename # Set the download filename
+            )
+
+        except Exception as e:
+            print(f"Error during DICOM conversion: {e}")
+            flash(f'An error occurred during conversion: {str(e)}', 'error')
+            return redirect(url_for('dicom_converter_form'))
+
+    # <<< ADDED END: DICOM Converter Routes >>>
+
 
     # <<< ADDED/MODIFIED END >>>
 

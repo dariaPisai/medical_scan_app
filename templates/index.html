@@ -19,6 +19,7 @@
             <ul>
                 <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-microscope sidebar-icon"></i><span class="sidebar-text">Analyze Scan</span></a></li>
                 <li><a href="{{ url_for('history') }}"><i class="fas fa-history sidebar-icon"></i><span class="sidebar-text">History</span></a></li>
+                <li><a href="{{ url_for('dicom_converter_form') }}"><i class="fas fa-file-medical-alt sidebar-icon"></i><span class="sidebar-text">DICOM Converter</span></a></li>
                 <li><a href="#"><i class="fas fa-cog sidebar-icon"></i><span class="sidebar-text">Settings</span></a></li>
                 <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt sidebar-icon"></i><span class="sidebar-text">Logout</span></a></li>
             </ul>

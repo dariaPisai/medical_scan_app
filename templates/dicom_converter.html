@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}DICOM to JPG Converter{% endblock %}
+
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dicom_converter.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <!-- Expandable Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-brain sidebar-icon"></i>
+            <span class="sidebar-text">Medical Scan App</span>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-microscope sidebar-icon"></i><span class="sidebar-text">Analyze Scan</span></a></li>
+                <li><a href="{{ url_for('history') }}"><i class="fas fa-history sidebar-icon"></i><span class="sidebar-text">History</span></a></li>
+                <li><a href="{{ url_for('dicom_converter_form') }}" class="active"><i class="fas fa-file-medical-alt sidebar-icon"></i><span class="sidebar-text">DICOM Converter</span></a></li>
+                <li><a href="#"><i class="fas fa-cog sidebar-icon"></i><span class="sidebar-text">Settings</span></a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt sidebar-icon"></i><span class="sidebar-text">Logout</span></a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <!-- Top Navbar -->
+        <header class="main-navbar">
+            <div class="navbar-title">
+                <i class="fas fa-bars menu-toggle" id="menu-toggle"></i>
+                <span>DICOM Converter</span>
+            </div>
+        </header>
+
+        <section class="analysis-section">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-file-medical-alt"></i> DICOM to JPG Converter</h2>
+                    <p>Convert medical DICOM files to JPG format for easier viewing and sharing</p>
+                </div>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="panel-content">
+                    <div class="converter-notes">
+                        <div class="note-title">
+                            <i class="fas fa-info-circle"></i> About DICOM Conversion
+                        </div>
+                        <p>This tool converts DICOM medical imaging files (.dcm) to standard JPG images for easy viewing on any device.</p>
+                        <p>For multi-frame DICOM files, only the middle frame/slice will be converted.</p>
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data" action="{{ url_for('convert_dicom') }}" id="dicom-form">
+                        <div class="upload-area" id="upload-area">
+                            <i class="fas fa-file-medical upload-icon"></i>
+                            <h3>Drag & Drop DICOM File Here</h3>
+                            <p>or</p>
+                            <label for="dicom_file" class="browse-button">Browse Files</label>
+                            <input type="file" id="dicom_file" name="dicom_file" accept=".dcm,.dicom" required class="file-input">
+                        </div>
+                        
+                        <div id="selected-file-container" style="display: none;">
+                            <div class="selected-file">
+                                <i class="fas fa-file-medical"></i>
+                                <span class="file-name" id="filename-display">No file selected</span>
+                                <button type="button" class="remove-file" id="remove-file"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="convert-button" class="convert-button" disabled>
+                            <i class="fas fa-exchange-alt"></i> Convert to JPG
+                        </button>
+                    </form>
+                    
+                    <!-- Preview will be added dynamically by JavaScript -->
+                    <div id="preview-container" class="preview-container">
+                        <h3>Preview will appear after conversion</h3>
+                        <!-- Preview image will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('dicom_file');
+            const selectedFileContainer = document.getElementById('selected-file-container');
+            const filenameDisplay = document.getElementById('filename-display');
+            const removeFileButton = document.getElementById('remove-file');
+            const convertButton = document.getElementById('convert-button');
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            // Menu toggle functionality for sidebar
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('expanded');
+                    document.querySelector('.main-content').classList.toggle('sidebar-expanded');
+                });
+            }
+            
+            // File drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelect();
+                }
+            });
+            
+            // Click on upload area to trigger file input
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            // File selection handling
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            function handleFileSelect() {
+                if (fileInput.files.length) {
+                    const fileName = fileInput.files[0].name;
+                    
+                    // Check if file is a DICOM file
+                    if (!fileName.toLowerCase().endsWith('.dcm') && !fileName.toLowerCase().endsWith('.dicom')) {
+                        showAlert('Please select a valid DICOM file (.dcm or .dicom)');
+                        fileInput.value = '';
+                        return;
+                    }
+                    
+                    filenameDisplay.textContent = fileName;
+                    selectedFileContainer.style.display = 'block';
+                    convertButton.disabled = false;
+                }
+            }
+            
+            // Remove selected file
+            removeFileButton.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent click from bubbling to upload area
+                fileInput.value = '';
+                selectedFileContainer.style.display = 'none';
+                convertButton.disabled = true;
+            });
+            
+            // Alert function
+            function showAlert(message, type = 'error') {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert ${type}`;
+                alertDiv.textContent = message;
+                
+                const flashContainer = document.querySelector('.flash-messages') || 
+                                      (() => {
+                                          const container = document.createElement('div');
+                                          container.className = 'flash-messages';
+                                          document.querySelector('.panel-header').after(container);
+                                          return container;
+                                      })();
+                
+                flashContainer.appendChild(alertDiv);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                    if (!flashContainer.children.length) {
+                        flashContainer.remove();
+                    }
+                }, 5000);
+            }
+        });
+    </script>
+{% endblock %}
