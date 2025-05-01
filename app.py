@@ -46,7 +46,7 @@ num_classes = 4
 img_size = 224
 # Assuming app.py is in the root 'medical_scan_app' folder
 # Adjust if app.py is located elsewhere relative to the weights file
-model_weights_path = './ml_training/resnet_brain_tumor_weights.pth'
+model_weights_path = './ml_training/resnet50_2_tumor_classifier_best_weights.pth'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"Attempting to use device: {device}") # Log device
 
