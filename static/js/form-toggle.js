@@ -42,74 +42,87 @@ document.addEventListener('DOMContentLoaded', function() {
             // Wait for the flip animation to start before updating height
             setTimeout(updateContainerHeight, 50);
         });
-    }
-
-    // Add this function to your existing code, after the setup of the flip container
-    function updateContainerHeight() {
-        // Get current height of active section
-        const activeSection = flipContainer.classList.contains('flipped') 
-            ? registerSection 
-            : loginSection;
         
-        // Set the container height to match the active section
-        const sectionHeight = activeSection.offsetHeight;
-        flipContainer.style.height = sectionHeight + 'px';
+        // Initial height update
+        updateContainerHeight();
     }
-
-    // Call once on page load to set initial height
-    setTimeout(updateContainerHeight, 100);
-
-    // Also update on window resize
-    window.addEventListener('resize', updateContainerHeight);
-
-    // Password toggle for registration form
-    const registerPasswordInput = document.querySelector('.register-password');
-    const confirmPasswordInput = document.querySelector('.confirm-password');
     
-    function setupPasswordToggle(inputElement) {
-        if (!inputElement) return;
+    // Function to update container height based on current visible content
+    function updateContainerHeight() {
+        if (!flipContainer) return;
         
-        const parentGroup = inputElement.closest('.form-group');
-        if (!parentGroup) return;
-        
-        let labelContainer = parentGroup.querySelector('.label-container');
-        
-        // If there's no label container, create one
-        if (!labelContainer) {
-            labelContainer = document.createElement('div');
-            labelContainer.className = 'label-container';
+        // Determine which section is currently visible
+        const currentSection = flipContainer.classList.contains('flipped') ? 
+            registerSection : loginSection;
             
-            // Find the label and move it into the container
-            const label = parentGroup.querySelector('.form-label');
-            if (label) {
-                parentGroup.insertBefore(labelContainer, label);
-                labelContainer.appendChild(label);
-            } else {
-                parentGroup.insertBefore(labelContainer, parentGroup.firstChild);
-            }
-        }
+        // Reset container height to auto to get proper content height
+        flipContainer.style.height = 'auto';
         
-        // Create the toggle button
-        const toggleBtn = document.createElement('a');
-        toggleBtn.href = "#";
-        toggleBtn.className = "password-toggle";
-        toggleBtn.textContent = "Show";
-        labelContainer.appendChild(toggleBtn);
-        
-        toggleBtn.addEventListener('click', function(e) {
+        // Set the container height to match the content height
+        const contentHeight = currentSection.offsetHeight;
+        flipContainer.style.height = contentHeight + 'px';
+    }
+    
+    // Handle password visibility toggles - Fixed version
+    const passwordToggles = document.querySelectorAll('.password-toggle');
+    
+    passwordToggles.forEach(function(toggle) {
+        toggle.addEventListener('click', function(e) {
             e.preventDefault();
             
-            if (inputElement.type === 'password') {
-                inputElement.type = 'text';
-                this.textContent = "Hide";
+            // Find the password field that belongs to this toggle button
+            const formGroup = this.closest('.form-group');
+            if (!formGroup) return;
+            
+            const passwordField = formGroup.querySelector('input[type="password"], input[type="text"]');
+            if (!passwordField) return;
+            
+            // Toggle password visibility
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                this.textContent = 'Hide';
             } else {
-                inputElement.type = 'password';
-                this.textContent = "Show";
+                passwordField.type = 'password';
+                this.textContent = 'Show';
             }
         });
-    }
+    });
     
-    // Setup password toggles for both password fields
-    setupPasswordToggle(registerPasswordInput);
-    setupPasswordToggle(confirmPasswordInput);
+    // Update container height when window is resized
+    window.addEventListener('resize', updateContainerHeight);
+
+    // Reset form fields on page load to clear any browser autofill
+    const formInputs = document.querySelectorAll('.form-input');
+    formInputs.forEach(input => {
+        // Store original placeholder
+        const originalPlaceholder = input.placeholder;
+        
+        // Apply a forced style refresh
+        input.style.color = '#202124';
+        
+        // For password fields, ensure they're of type password
+        if (input.id.includes('password')) {
+            input.type = 'password';
+        }
+        
+        // Reset placeholder to ensure it's visible
+        setTimeout(() => {
+            input.placeholder = '';
+            setTimeout(() => {
+                input.placeholder = originalPlaceholder;
+            }, 10);
+        }, 10);
+    });
+
+    // Add specific CSS to force visibility for Chrome autofill
+    const style = document.createElement('style');
+    style.textContent = `
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #202124 !important;
+            transition: background-color 5000s ease-in-out 0s !important;
+        }
+    `;
+    document.head.appendChild(style);
 });

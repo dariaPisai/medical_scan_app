@@ -1,5 +1,16 @@
 import os
 # <<< ADDED/MODIFIED START >>>
+# <<< ADDED/MODIFIED START >>>
+# Imports for model, image processing, etc.
+import torch
+import torch.nn as nn
+from torchvision import models, transforms
+from PIL import Image # Library to load images
+import io # For processing image in memory
+# --- Add these ---
+import cv2         # OpenCV for image processing used in crop_img
+import numpy as np # Already imported but ensure it's available
+import imutils     # Required by crop_img (pip install imutils)
 # Imports for model, image processing, etc.
 import torch
 import torch.nn as nn
@@ -52,7 +63,7 @@ num_classes = 4
 img_size = 224
 # Assuming app.py is in the root 'medical_scan_app' folder
 # Adjust if app.py is located elsewhere relative to the weights file
-model_weights_path = './ml_training/resnet50_2_tumor_classifier_best_weights.pth'
+model_weights_path = './ml_training/resnet50_tumor_classifier_best_val_acc.pth'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"Attempting to use device: {device}") # Log device
 
@@ -82,12 +93,112 @@ print(f"Model ready on device: {device}")
 
 # --- Image Preprocessing Transform ---
 # (Must match the validation/inference transform used before)
-preprocess = transforms.Compose([
-    transforms.Resize((img_size, img_size)), # Resize directly
+preprocess_after_crop = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
-print("Preprocessing transform created.")
+print("Preprocessing transform (ToTensor, Normalize) created.")
+
+def crop_img(img, target_size=img_size): # Pass target_size
+    """
+    Finds the presumed tumor area based on contours, crops, and resizes the image.
+    Handles grayscale, color, and alpha channel images.
+    Returns None if cropping or resizing fails critically.
+    Input: NumPy array (BGR format preferred).
+    Output: NumPy array (BGR format, resized) or None.
+    """
+    # Input validation
+    if img is None:
+        print("Warning: crop_img received a None image.")
+        return None
+    if not isinstance(img, np.ndarray) or img.ndim < 2:
+         print(f"Warning: crop_img received invalid image data type/dims: {type(img)}, ndim={img.ndim if isinstance(img, np.ndarray) else 'N/A'}")
+         return None
+    if img.shape[0] <= 0 or img.shape[1] <= 0:
+        print(f"Warning: crop_img received image with invalid dimensions: {img.shape}")
+        return None
+
+    # Ensure image is BGR
+    if len(img.shape) == 2 or img.shape[2] == 1: # Grayscale
+        img_bgr = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    elif img.shape[2] == 4: # BGRA
+        img_bgr = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+    elif img.shape[2] == 3: # BGR
+        img_bgr = img
+    else:
+        print(f"Warning: Unsupported number of channels ({img.shape[2]}) in image. Cannot process.")
+        try:
+            # Attempt resize if valid shape
+            if img.shape[0] > 0 and img.shape[1] > 0:
+                 print("  Attempting direct resize as fallback.")
+                 return cv2.resize(img, (target_size, target_size))
+            else:
+                 return None
+        except Exception as e:
+            print(f"  Fallback resize also failed: {e}")
+            return None
+
+
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    # Thresholding
+    thresh = cv2.threshold(gray, 45, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.erode(thresh, None, iterations=2)
+    thresh = cv2.dilate(thresh, None, iterations=2)
+
+    # Find contours
+    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+
+    # Fallback: If no contours, resize the original BGR image
+    if not cnts:
+        print("Warning: No contours found. Resizing original image.")
+        try:
+            return cv2.resize(img_bgr, (target_size, target_size))
+        except Exception as e:
+             print(f"  Fallback resize failed for no-contour image: {e}")
+             return None # Indicate failure
+
+    # Find the largest contour and its bounding box
+    c = max(cnts, key=cv2.contourArea)
+    extLeft = tuple(c[c[:, :, 0].argmin()][0])
+    extRight = tuple(c[c[:, :, 0].argmax()][0])
+    extTop = tuple(c[c[:, :, 1].argmin()][0])
+    extBot = tuple(c[c[:, :, 1].argmax()][0])
+
+    # Crop using bounding box coordinates (with bounds checking)
+    ADD_PIXELS = 0 # Optional buffer
+    top = max(0, extTop[1] - ADD_PIXELS)
+    bottom = min(img_bgr.shape[0], extBot[1] + ADD_PIXELS)
+    left = max(0, extLeft[0] - ADD_PIXELS)
+    right = min(img_bgr.shape[1], extRight[0] + ADD_PIXELS)
+
+    # Validate crop dimensions
+    if top >= bottom or left >= right:
+        print(f"Warning: Invalid crop dimensions calculated ({top}:{bottom}, {left}:{right}). Resizing original image.")
+        try:
+            return cv2.resize(img_bgr, (target_size, target_size))
+        except Exception as e:
+             print(f"  Fallback resize failed for invalid crop dims: {e}")
+             return None # Indicate failure
+
+    cropped_img = img_bgr[top:bottom, left:right].copy()
+
+    # Final resize of the cropped image
+    try:
+        # *** IMPORTANT: crop_img now returns the resized image ***
+        resized_img = cv2.resize(cropped_img, (target_size, target_size))
+        return resized_img
+    except Exception as e:
+        print(f"Error resizing cropped image: {e}. Image shape was {cropped_img.shape}")
+        # Attempt to resize original as last resort
+        try:
+             print("  Attempting resize of original image instead.")
+             return cv2.resize(img_bgr, (target_size, target_size))
+        except Exception as e_orig:
+             print(f"    Resize of original image also failed: {e_orig}")
+             return None
 
 # --- Class Mappings (Crucial!) ---
 # This MUST match the mapping used by ImageFolder during training
@@ -207,89 +318,124 @@ def create_app():
         if file.filename == '':
             flash('No file selected.')
             return redirect(url_for('index'))
-        
+
         original_filename = secure_filename(file.filename)
 
         if not allowed_file(file.filename):
             flash('Invalid file type. Please upload PNG, JPG, or JPEG.')
             return redirect(url_for('index'))
 
-        img_bytes = None
+        img_bytes_for_saving = None # Store original bytes for saving later
         # --- Image Processing and Prediction ---
         try:
-            print(f"Processing file: {file.filename}") # Log filename
+            print(f"Processing file: {file.filename}")
             # Read image file into memory
             img_bytes = file.read()
             if not img_bytes:
                  flash('Uploaded file appears to be empty.')
                  return redirect(url_for('index'))
-            img = Image.open(io.BytesIO(img_bytes)).convert('RGB') # Ensure RGB
+            img_bytes_for_saving = img_bytes # Keep original bytes
 
-            # Preprocess the image
-            input_tensor = preprocess(img)
+            # <<< MODIFIED START: Apply crop_img >>>
+            # 1. Decode image bytes into an OpenCV NumPy array (BGR)
+            np_arr = np.frombuffer(img_bytes, np.uint8)
+            img_cv = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) # Use cv2.IMREAD_COLOR for BGR
+
+            if img_cv is None:
+                 flash('Could not decode image file. It might be corrupted or an unsupported format.')
+                 return redirect(url_for('index'))
+
+            # 2. Apply the crop_img function
+            print("Applying crop_img preprocessing...")
+            processed_cv_img = crop_img(img_cv, target_size=img_size) # crop_img now resizes
+
+            if processed_cv_img is None:
+                 flash('Image preprocessing (cropping/resizing) failed. Please check image format or content.')
+                 return redirect(url_for('index'))
+
+            # 3. Convert the processed NumPy array (BGR) back to a PIL Image (RGB)
+            #    OpenCV uses BGR, PIL uses RGB
+            img_pil = Image.fromarray(cv2.cvtColor(processed_cv_img, cv2.COLOR_BGR2RGB))
+            # <<< MODIFIED END >>>
+
+            # 4. Apply the remaining transforms (ToTensor, Normalize)
+            input_tensor = preprocess_after_crop(img_pil) # Use the updated transform
             input_batch = input_tensor.unsqueeze(0).to(device) # Add batch dim and move to device
 
-            # Perform Inference
+            # --- Perform Inference ---
             print("Running model inference...")
             with torch.no_grad():
-                output = model(input_batch) # Get model's raw output scores (logits)
+                output = model(input_batch)
 
-            # Interpret results
+            # --- Interpret results ---
             probabilities = torch.nn.functional.softmax(output[0], dim=0)
             confidence, predicted_idx_tensor = torch.max(probabilities, 0)
-            predicted_idx = predicted_idx_tensor.item() # Get Python integer index
+            predicted_idx = predicted_idx_tensor.item()
 
             predicted_class_name = idx_to_class.get(predicted_idx, "Unknown Index")
             predicted_severity = severity_ranking.get(predicted_class_name, -1)
-            confidence_percent = confidence.item() * 100 # Convert confidence to percentage
+            confidence_percent = confidence.item() * 100
 
             print(f"Prediction: {predicted_class_name}, Confidence: {confidence_percent:.2f}%")
 
+            # --- Save original image and history record ---
             file_extension = original_filename.rsplit('.', 1)[1].lower()
             unique_filename = f"{uuid.uuid4()}.{file_extension}"
             save_path = os.path.join(app.config['HISTORY_UPLOAD_FOLDER'], unique_filename)
 
             try:
-                # Save the image bytes we read earlier
+                # Save the *original* image bytes we stored earlier
                 with open(save_path, 'wb') as f:
-                    f.write(img_bytes)
-                print(f"Image saved to: {save_path}")
+                    f.write(img_bytes_for_saving) # Save the original file content
+                print(f"Original image saved to: {save_path}")
 
-                # Create history record using the imported model
+                # Create history record
                 new_record = AnalysisHistory(
                     user_id=current_user.id,
                     original_filename=original_filename,
                     stored_filename=unique_filename,
                     predicted_class=predicted_class_name,
-                    confidence=confidence_percent,
+                    confidence=confidence_percent, # This already has *100 applied
                     severity_level=predicted_severity
                 )
                 db.session.add(new_record)
                 db.session.commit()
                 print("Analysis record saved to database.")
-                flash('Analysis successful and saved to history.', 'success') # Add success message
+                flash('Analysis successful and saved to history.', 'success')
 
             except Exception as save_err:
                 print(f"Error saving file or DB record: {save_err}")
                 db.session.rollback()
                 flash('Analysis complete, but failed to save history record.', 'error')
-            # <<< ADDED/MODIFIED END >>>
 
-            # Render results on the index page with correct parameters
+            # --- Render results ---
             return render_template('index.html',
                                 username=current_user.username,
                                 prediction=predicted_class_name,
-                                filename=file.filename,
-                                confidence=f"{confidence_percent:.2f}", # Format confidence with 2 decimal places
+                                filename=original_filename, # Show original filename
+                                confidence=f"{confidence_percent:.2f}",
                                 severity=predicted_severity)
 
+        except ImportError:
+            # Specific error if AnalysisHistory couldn't be imported
+            print("ERROR: AnalysisHistory model not available for saving.")
+            flash('Analysis complete, but history feature is unavailable.', 'warning')
+             # Still show results even if history fails due to import error
+            return render_template('index.html',
+                                username=current_user.username,
+                                prediction=predicted_class_name,
+                                filename=original_filename,
+                                confidence=f"{confidence_percent:.2f}",
+                                severity=predicted_severity)
         except Exception as e:
-            print(f"Error during analysis for file {file.filename}: {e}") # Log the error
-            flash(f'An error occurred during image analysis. Please try again or contact support.')
+            print(f"Error during analysis for file {original_filename}: {e}") # Log the error
+            import traceback
+            traceback.print_exc() # Print full traceback for debugging
+            flash(f'An error occurred during image analysis. Please check the logs or contact support.')
             # Render index page but indicate an error occurred
             return render_template('index.html',
                                 username=current_user.username)
-        # <<< ADDED/MODIFIED END >>>
+        
 
     # <<< ADDED/MODIFIED START >>>
     # --- Add History Route ---

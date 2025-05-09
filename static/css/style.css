@@ -273,68 +273,96 @@ body {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    position: relative;
+    margin-bottom: 20px;
+    z-index: 1; /* Ensure form elements stay above any background elements */
 }
 
 /* Slightly reduce form group spacing for registration form */
 #register-section .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 16px; /* Slightly more space than login form */
+    position: relative;
 }
 
 .form-label {
     display: block;
-    font-size: 0.85rem;
-    color: #bdc3c7;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #202124;
+    font-size: 14px;
 }
 
 /* Form inputs - more seamless with the design */
 .form-input {
-    background-color: rgba(44, 62, 80, 0.5); /* More transparent */
-    border: 1px solid rgba(55, 90, 138, 0.3); /* Subtler border */
-    color: #ffffff;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    padding: 8px 12px;
     width: 100%;
-    box-sizing: border-box;
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    transition: all 0.3s;
+    background-color: white;
+    color: #202124; /* Ensure text is dark */
+    box-shadow: none; /* Remove any shadow that might affect visibility */
+    -webkit-appearance: none; /* Reset default styling on iOS */
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .form-input:focus {
-    background-color: rgba(44, 62, 80, 0.7);
-    border-color: rgba(3, 169, 244, 0.6);
-    box-shadow: 0 0 0 2px rgba(3, 169, 244, 0.2);
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    outline: none;
 }
 
-.form-input::placeholder { 
-    color: #7f8c8d;
+/* Make sure placeholders are visible but subtle */
+.form-input::placeholder {
+    color: #9aa0a6;
+    opacity: 1;
+}
+
+/* Fix the autofill styling which can cause display issues */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover, 
+.form-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #202124;
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .label-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    margin-bottom: 8px;
 }
 
 .password-toggle {
-    font-size: 0.8rem;
-    color: #bdc3c7;
+    color: #1a73e8;
+    font-size: 14px;
     text-decoration: none;
     cursor: pointer;
+    transition: color 0.3s;
+    margin-left: auto;
+    display: inline-block;
+    line-height: 1;
 }
 
-.password-toggle:hover {
-    color: #ffffff;
+#register-section .form-group:nth-last-child(2) .password-toggle {
+    margin-right: 0; /* Ensure it aligns to the right edge */
 }
 
+.password-helper {
+    font-size: 0.75rem;
+    color: #bdc3c7;
+    margin-top: 3px;
+}
 
 .form-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    font-size: 0.9rem;
 }
 
 .remember-me label {
@@ -619,6 +647,8 @@ footer {
 
 #register-section {
     transform: rotateY(180deg);
+    background: white;
+    border-radius: 10px;
 }
 
 /* Remove old animation since we're using the flip now */
@@ -636,6 +666,8 @@ footer {
     display: block;
     opacity: 1;
     transform: translateY(0);
+    background: white;
+    border-radius: 10px;
 }
 
 /* Ensure consistent form styles across both sections */
@@ -663,12 +695,6 @@ footer {
     .login-info-panel, .login-form-panel {
         width: 100%;
     }
-}
-
-.password-helper {
-    font-size: 0.75rem;
-    color: #bdc3c7;
-    margin-top: 3px;
 }
 
 @media (max-width: 1100px) {
@@ -720,4 +746,336 @@ footer {
         max-width: none; 
     }
 
+}
+
+/* Login Form Styles */
+
+/* Form container and flip effect */
+.form-flip-container {
+    perspective: 1000px;
+    transition: height 0.5s;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.form-flipper {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.form-flip-container.flipped .form-flipper {
+    transform: rotateY(180deg);
+}
+
+#login-section, #register-section {
+    backface-visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 30px;
+}
+
+#login-section {
+    z-index: 2;
+    transform: rotateY(0deg);
+}
+
+#register-section {
+    transform: rotateY(180deg);
+}
+
+/* Form elements styling */
+.form-content {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 28px; /* Increased since no social buttons */
+    padding-bottom: 10px;
+    position: relative;
+}
+
+.form-header:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #1a73e8, #0d47a1);
+    border-radius: 2px;
+}
+
+.form-header h2 {
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: #1a73e8;
+    font-weight: 600;
+}
+
+.form-header p {
+    color: #5f6368;
+    font-size: 16px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #202124;
+    font-size: 14px;
+}
+
+.label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 1px solid #dadce0;
+    border-radius: 6px; /* More rounded corners */
+    transition: all 0.3s;
+    background-color: white;
+    color: #202124; /* Ensure text is dark */
+    box-shadow: none; /* Remove any shadow that might affect visibility */
+    -webkit-appearance: none; /* Reset default styling on iOS */
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.form-input:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    outline: none;
+}
+
+/* Enhanced Login/Register Button */
+.login-button, .register-button {
+    width: 100%;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px; /* Increased since no divider now */
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.4);
+    letter-spacing: 0.5px;
+}
+
+.login-button:hover, .register-button:hover {
+    background: linear-gradient(135deg, #0d47a1, #1a73e8);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(26, 115, 232, 0.5);
+}
+
+.login-button:active, .register-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(26, 115, 232, 0.4);
+}
+
+/* Remember me checkbox styling */
+.remember-me input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid #dadce0;
+    border-radius: 3px;
+    margin-right: 8px;
+    position: relative;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.remember-me input[type="checkbox"]:checked {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+}
+
+.remember-me input[type="checkbox"]:checked:after {
+    content: "\2713";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+}
+
+.remember-me label {
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+/* Remember me and forgot password */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+}
+
+.remember-me input {
+    margin-right: 8px;
+}
+
+.forgot-password {
+    color: #1a73e8;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.forgot-password:hover {
+    color: #0d47a1;
+    text-decoration: underline;
+}
+
+/* Form toggle links */
+.form-toggle-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #5f6368;
+}
+
+.form-toggle-link a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.form-toggle-link a:hover {
+    color: #0d47a1;
+    text-decoration: underline;
+}
+
+/* Password toggle button */
+.password-toggle {
+    color: #1a73e8;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.password-toggle:hover {
+    color: #0d47a1;
+    text-decoration: underline;
+}
+
+/* Social login buttons */
+.social-login {
+    margin-top: 20px;
+}
+
+.social-button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.social-button:hover {
+    background-color: #f1f3f5;
+}
+
+.social-button img {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #dadce0;
+}
+
+.divider span {
+    padding: 0 10px;
+    color: #5f6368;
+    font-size: 14px;
+}
+
+/* Flash messages */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.flash.success {
+    background-color: #e6f4ea;
+    color: #137333;
+    border-left: 4px solid #137333;
+}
+
+.flash.danger {
+    background-color: #fce8e6;
+    color: #c5221f;
+    border-left: 4px solid #c5221f;
+}
+
+.flash.info {
+    background-color: #e8f0fe;
+    color: #1a73e8;
+    border-left: 4px solid #1a73e8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-content {
+        padding: 20px;
+    }
 }
