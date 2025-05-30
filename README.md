@@ -54,46 +54,6 @@ It utilizes a **ResNet50 (Residual Neural Network with 50 layers)** architecture
     * `datetime`: For working with dates and times.
 * **Database:** (Implicitly, via Flask-SQLAlchemy, likely SQLite for development or PostgreSQL/MySQL for production - *specify if known*)
 
-## Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/dariaPisai/medical_scan_app.git](https://github.com/dariaPisai/medical_scan_app.git)
-    cd medical_scan_app
-    ```
-2.  **Create and activate a virtual environment (recommended):**
-    ```bash
-    python -m venv venv
-    # On Windows
-    # venv\Scripts\activate
-    # On macOS/Linux
-    # source venv/bin/activate
-    ```
-3.  **Install dependencies:**
-    *(Assuming you have a `requirements.txt` file)*
-    ```bash
-    pip install -r requirements.txt
-    ```
-    *(If no `requirements.txt` is present, you might need to list key packages like `Flask`, `torch`, `torchvision`, `opencv-python`, `pydicom`, `numpy`, `scikit-learn`, `matplotlib`, `Flask-SQLAlchemy`, `Flask-Login`, `Flask-Migrate`, `Flask-WTF`)*
-
-4.  **Database Setup (if using Flask-Migrate):**
-    *(These commands might be specific to your setup)*
-    ```bash
-    # flask db init  (if first time)
-    # flask db migrate -m "Initial migration"
-    # flask db upgrade
-    ```
-5.  **Download Pre-trained Model Weights (if applicable):**
-    *If your application relies on specific pre-trained model files that are not included in the repository, provide instructions on where to download them and where to place them in the project structure.*
-    *(The PDF mentions a `resnet50_tumor_classifier_best_acc.pth` file in Figure 11, which is likely the trained model. Ensure this is handled.)*
-
-6.  **Run the application:**
-    ```bash
-    flask run
-    # or
-    # python app.py (or your main application script)
-    ```
-    The application should then be accessible at `http://127.0.0.1:5000/` by default.
 
 ## Usage
 
@@ -120,7 +80,6 @@ It utilizes a **ResNet50 (Residual Neural Network with 50 layers)** architecture
 
 ## Screenshots
 
-**(Example):**
 * ![Login Page](screenshots/login.png)
 * ![Scan Analysis Page](screenshots/home_page.png)
 * ![History Page](screenshots/history_page.png)
@@ -143,16 +102,5 @@ Performance metrics such as accuracy, precision, recall, and F1-score were used 
     * Final Validation Accuracy: ~90.11%
 
 The model trained from scratch showed superior final accuracy on this specific dataset, though the pre-trained model had better initial performance.
-
-## Contributing
-
-Contributions are welcome! If you'd like to contribute, please follow these steps:
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/your-feature-name`).
-3.  Make your changes and commit them (`git commit -m 'Add some amazing feature'`).
-4.  Push to the branch (`git push origin feature/your-feature-name`).
-5.  Open a Pull Request.
-
-Please ensure to update tests as appropriate and document any new features.
 
 
