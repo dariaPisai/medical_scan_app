@@ -1,6 +1,6 @@
 # Brain Tumor Identification App from MRI Scans 
 
-**Author:** Pisai Daria-Ioana
+**Author:** Daria Pisai
 **Project Link:** [https://github.com/dariaPisai/medical_scan_app](https://github.com/dariaPisai/medical_scan_app)
 
 ## Description
